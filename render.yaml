@@ -12,12 +12,21 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
+      # LLM: set EITHER the Ollama pair OR the OpenRouter key (Ollama wins if both are set).
+      # Ollama must be reachable from the internet — Render cannot see 127.0.0.1 on your PC.
+      # e.g. your ngrok URL: https://xxxx.ngrok.io (no trailing slash, no /v1).
+      - key: OLLAMA_BASE_URL
+        sync: false
+      # Must be a model name listed by <OLLAMA_BASE_URL>/api/tags.
+      - key: OLLAMA_MODEL
+        value: llama3:8b
+      # Only if not using Ollama:
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_MODEL
         value: openai/gpt-4o-mini
       # Optional. Passwords you make up, comma-separated, e.g. "alice-7f3k2,bob-p9x1q".
-      # Leave empty = anyone with the URL can use the server (and your OpenRouter credit).
+      # Leave empty = anyone with the URL can use the server (and your model).
       # Set = the app asks each tester for one of these once. Remove one to revoke it.
       - key: WRITEUP_ACCESS_KEYS
         sync: false
