@@ -1,0 +1,29 @@
+# Render Blueprint for the hosted WriteUp backend.
+# Dashboard: New → Blueprint → pick this repo. Then fill the env vars marked sync: false.
+services:
+  - type: web
+    name: writeup-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt "psycopg[binary]>=3.2.0"
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-4o-mini
+      # Optional. Passwords you make up, comma-separated, e.g. "alice-7f3k2,bob-p9x1q".
+      # Leave empty = anyone with the URL can use the server (and your OpenRouter credit).
+      # Set = the app asks each tester for one of these once. Remove one to revoke it.
+      - key: WRITEUP_ACCESS_KEYS
+        sync: false
+      # Your Render hostname, e.g. "writeup-api.onrender.com".
+      - key: WRITEUP_ALLOWED_HOSTS
+        sync: false
+      # Optional: connection string of a Render Postgres DB to keep /log rows across redeploys.
+      - key: DATABASE_URL
+        sync: false
