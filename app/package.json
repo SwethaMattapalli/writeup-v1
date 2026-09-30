@@ -1,0 +1,115 @@
+{
+  "name": "writeup",
+  "version": "0.1.0",
+  "description": "WriteUp — AI text rewriting desktop assistant",
+  "author": "WriteUp",
+  "homepage": "https://github.com/writeup-assistant",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite dev\" \"wait-on http://localhost:1420 && electron .\"",
+    "build": "vite build && node electron/fix-file-urls.cjs",
+    "dist": "vite build && electron-builder --publish never",
+    "dist:win": "vite build && electron-builder --win nsis portable --publish never",
+    "dist:win:unpacked": "vite build && electron-builder --win dir --publish never",
+    "dist:linux": "vite build && electron-builder --linux AppImage deb --publish never",
+    "dist:mac": "node ../scripts/check-macos-release.cjs && vite build && electron-builder --mac dmg zip --x64 --arm64 --publish never",
+    "dist:mac:dmg": "npm run dist:mac",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.6",
+    "@sveltejs/kit": "^2.9.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "concurrently": "^9.0.0",
+    "electron": "^33.0.0",
+    "@electron/notarize": "^2.5.0",
+    "electron-builder": "^25.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.writeup.assistant",
+    "productName": "WriteUp",
+    "copyright": "Copyright © WriteUp",
+    "asar": true,
+    "forceCodeSigning": true,
+    "afterSign": "electron/notarize.cjs",
+    "asarUnpack": [
+      "build/**/*"
+    ],
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "*.py",
+          "requirements.txt"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "buildResources"
+    },
+    "win": {
+      "icon": "buildResources/icon.png",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "WriteUp",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "WriteUp-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "WriteUp-Portable-${version}.${ext}"
+    },
+    "mac": {
+      "icon": "buildResources/icon.png",
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"],
+      "artifactName": "WriteUp-${version}-mac-${arch}.${ext}",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": true,
+      "entitlements": "../scripts/mac-entitlements.plist",
+      "entitlementsInherit": "../scripts/mac-entitlements.plist",
+      "extendInfo": {
+        "NSAppleEventsUsageDescription": "WriteUp sends Copy and Paste keystrokes to the app you are typing in so it can read and replace the selected text."
+      }
+    },
+    "linux": {
+      "icon": "buildResources/icon.png",
+      "category": "Utility",
+      "maintainer": "WriteUp",
+      "executableName": "writeup",
+      "target": ["AppImage", "deb"],
+      "artifactName": "WriteUp-${version}-${arch}.${ext}"
+    }
+  }
+}

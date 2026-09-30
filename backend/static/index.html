@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WriteUp</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        background: #0f0f1c;
+        color: #e5e7eb;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .wrap { max-width: 640px; margin: 0 auto; padding: 28px 18px; }
+      .logo { color: #a78bfa; font-weight: 650; margin-bottom: 8px; }
+      h1 { font-size: 22px; margin-bottom: 8px; }
+      .hint { color: #9ca3af; font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+      .tones { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+      .tone {
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        background: transparent;
+        color: #d1d5db;
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font: inherit;
+      }
+      .tone.on { background: #a78bfa; color: #1c1c2e; font-weight: 650; }
+      label { display: block; font-size: 12px; color: #9ca3af; margin: 10px 0 6px; }
+      textarea {
+        width: 100%;
+        min-height: 120px;
+        border-radius: 10px;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+        background: rgba(255,255,255,0.04);
+        color: #e5e7eb;
+        padding: 10px;
+        font: inherit;
+        line-height: 1.5;
+      }
+      .actions { display: flex; gap: 8px; margin-top: 12px; }
+      button.primary, button.secondary {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .primary { background: #a78bfa; color: #1c1c2e; font-weight: 650; }
+      .primary:disabled { opacity: 0.45; cursor: not-allowed; }
+      .secondary { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+      .err { color: #fca5a5; margin-top: 10px; font-size: 13px; }
+      .status { color: #9ca3af; margin-top: 10px; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="logo">✍ WriteUp</div>
+      <h1>Rewrite text</h1>
+      <p class="hint">Paste text, pick a tone, then rewrite. This page talks only to a local server on this PC (127.0.0.1). Keep Ollama running.</p>
+      <div class="tones" id="tones"></div>
+      <label for="input">Your text</label>
+      <textarea id="input" maxlength="3000" placeholder="Paste or type text here…"></textarea>
+      <label for="output">Suggestion</label>
+      <textarea id="output" placeholder="Rewritten text will appear here…"></textarea>
+      <div class="actions">
+        <button class="primary" id="go" type="button">Rewrite</button>
+        <button class="secondary" id="copy" type="button">Copy suggestion</button>
+      </div>
+      <p class="status" id="status"></p>
+      <p class="err" id="err"></p>
+    </div>
+    <script>
+      const TONES = ["Confident", "Professional", "Friendly", "Concise"]
+      let tone = "Professional"
+      const tonesEl = document.getElementById("tones")
+      TONES.forEach((name) => {
+        const b = document.createElement("button")
+        b.type = "button"
+        b.className = "tone" + (name === tone ? " on" : "")
+        b.textContent = name
+        b.onclick = () => {
+          tone = name
+          ;[...tonesEl.children].forEach((el) => el.classList.toggle("on", el.textContent === tone))
+        }
+        tonesEl.appendChild(b)
+      })
+
+      const input = document.getElementById("input")
+      const output = document.getElementById("output")
+      const go = document.getElementById("go")
+      const status = document.getElementById("status")
+      const err = document.getElementById("err")
+
+      go.onclick = async () => {
+        const text = input.value.trim()
+        err.textContent = ""
+        if (!text) { err.textContent = "Enter some text first."; return }
+        go.disabled = true
+        status.textContent = "Rewriting…"
+        try {
+          const res = await fetch("/rewrite", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text.slice(0, 3000), tone }),
+          })
+          const data = await res.json().catch(() => ({}))
+          if (!res.ok) throw new Error(data.detail || "Rewrite failed")
+          output.value = data.suggestion || ""
+          status.textContent = "Done."
+        } catch (e) {
+          err.textContent = e.message || String(e)
+          status.textContent = ""
+        } finally {
+          go.disabled = false
+        }
+      }
+
+      document.getElementById("copy").onclick = async () => {
+        if (!output.value) return
+        await navigator.clipboard.writeText(output.value)
+        status.textContent = "Copied to clipboard."
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/package-win-electron.py)",
+      "Bash(CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win nsis portable --publish never)",
+      "Bash(apt list *)",
+      "Bash(command -v apt-get)",
+      "Bash(command -v explorer.exe)",
+      "Bash(command -v wslpath)",
+      "Bash(wslpath -w /home/swetha/SailsProjects/writeup-main/app/dist)",
+      "Read(//usr/lib/**)",
+      "Bash(zip -r -q WriteUp-0.1.0-win-x64-portable.zip win-unpacked)",
+      "Bash(python3 -c ' *)",
+      "Bash(wine --version)",
+      "Bash(CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win nsis --publish never)",
+      "Bash(CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win nsis --publish never -c.forceCodeSigning=false)",
+      "Bash(python3 scripts/package-mac-electron.py)",
+      "Bash(tar -xzOf WriteUp-0.1.0-mac-arm64.tar.gz WriteUp-0.1.0-mac-arm64/WriteUp.app/Contents/Resources/backend/sanitize.py)",
+      "Bash(tar -xzOf WriteUp-0.1.0-mac-arm64.tar.gz WriteUp-0.1.0-mac-arm64/WriteUp.app/Contents/Resources/backend/llm.py)"
+    ]
+  }
+}

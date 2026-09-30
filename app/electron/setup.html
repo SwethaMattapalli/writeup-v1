@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>WriteUp Setup</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        height: 100%;
+        background: #13132b;
+        color: #e5e7eb;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 22px 24px 18px;
+      }
+      .logo {
+        color: #a78bfa;
+        font-weight: 650;
+        letter-spacing: 0.02em;
+        font-size: 15px;
+      }
+      h1 {
+        margin: 8px 0 6px;
+        font-size: 22px;
+        font-weight: 650;
+      }
+      .sub { color: #9ca3af; font-size: 13px; line-height: 1.5; }
+      .status {
+        margin-top: 18px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: rgba(167, 139, 250, 0.08);
+        border: 1px solid rgba(167, 139, 250, 0.22);
+        font-size: 13px;
+        line-height: 1.5;
+        min-height: 46px;
+      }
+      .status.error {
+        background: rgba(248, 113, 113, 0.08);
+        border-color: rgba(248, 113, 113, 0.3);
+        color: #fecaca;
+      }
+      .status.ready {
+        background: rgba(52, 211, 153, 0.08);
+        border-color: rgba(52, 211, 153, 0.28);
+        color: #a7f3d0;
+      }
+      .detail {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #9ca3af;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 120px;
+        overflow: auto;
+      }
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(167, 139, 250, 0.25);
+        border-top-color: #a78bfa;
+        border-radius: 50%;
+        display: inline-block;
+        vertical-align: -2px;
+        margin-right: 8px;
+        animation: spin 0.7s linear infinite;
+      }
+      .hidden { display: none !important; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .key-panel { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+      .provider {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .provider label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #e5e7eb;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      label { font-size: 12px; color: #9ca3af; }
+      input {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+        background: rgba(255,255,255,0.04);
+        color: #e5e7eb;
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+      }
+      input:focus { border-color: #a78bfa; }
+      .hint { font-size: 11px; color: #6b7280; }
+      .hint a { color: #a78bfa; }
+      .actions { margin-top: auto; display: flex; gap: 8px; padding-top: 16px; }
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 550;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .primary { background: #a78bfa; color: #1c1c2e; }
+      .secondary {
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+      }
+      .ghost { background: transparent; color: #9ca3af; }
+      kbd {
+        font-size: 11px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-family: ui-monospace, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="logo">✍ WriteUp</div>
+      <h1 id="title">Setting up…</h1>
+      <p class="sub" id="subtitle">Installing the files this app needs, then starting the local backend.</p>
+
+      <div class="status" id="status">
+        <span class="spinner" id="spinner"></span>
+        <span id="status-text">Starting installer…</span>
+        <div class="detail hidden" id="detail"></div>
+      </div>
+
+      <form class="key-panel hidden" id="key-panel">
+        <div class="provider">
+          <label><input type="radio" name="provider" id="use-ollama" value="ollama" checked /> Local Ollama</label>
+          <label><input type="radio" name="provider" id="use-openrouter" value="openrouter" /> OpenRouter</label>
+        </div>
+        <div id="ollama-fields">
+          <label for="ollama-url">Ollama URL</label>
+          <input id="ollama-url" type="text" value="http://127.0.0.1:11434" />
+          <label for="ollama-model">Model name</label>
+          <input id="ollama-model" type="text" placeholder="qwen3" value="qwen3" />
+          <p class="hint">Start Ollama first. WriteUp talks to it on this computer at port 11434 — no cloud key needed.</p>
+        </div>
+        <div id="openrouter-fields" class="hidden">
+          <label for="api-key">OpenRouter API key</label>
+          <input id="api-key" type="password" autocomplete="off" placeholder="sk-or-v1-…" />
+          <p class="hint">Get a key at <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>. It is stored only on this computer.</p>
+        </div>
+      </form>
+
+      <form class="key-panel hidden" id="access-panel">
+        <label for="access-key">WriteUp access key</label>
+        <input id="access-key" type="password" autocomplete="off" placeholder="Paste the key you were given" />
+        <p class="hint">Ask the WriteUp admin for a key. It is stored only on this computer.</p>
+      </form>
+
+      <div class="actions">
+        <button class="primary hidden" id="save-key" type="button">Save & continue</button>
+        <button class="secondary hidden" id="retry" type="button">Retry</button>
+        <button class="ghost hidden" id="hide" type="button">Hide window</button>
+      </div>
+    </div>
+    <script>
+      const statusEl = document.getElementById('status')
+      const statusText = document.getElementById('status-text')
+      const detailEl = document.getElementById('detail')
+      const spinner = document.getElementById('spinner')
+      const keyPanel = document.getElementById('key-panel')
+      const accessPanel = document.getElementById('access-panel')
+      const saveBtn = document.getElementById('save-key')
+      const retryBtn = document.getElementById('retry')
+      const hideBtn = document.getElementById('hide')
+      const title = document.getElementById('title')
+      const subtitle = document.getElementById('subtitle')
+
+      function render(p) {
+        statusText.textContent = p.message || ''
+        if (p.detail) {
+          detailEl.textContent = p.detail
+          detailEl.classList.remove('hidden')
+        } else {
+          detailEl.classList.add('hidden')
+        }
+
+        const waitingAccess = p.stage === 'accesskey'
+        const waitingKey = p.stage === 'apikey' || waitingAccess
+        const ready = p.stage === 'ready'
+        const error = p.stage === 'error'
+        const busy = !waitingKey && !ready && !error
+
+        spinner.classList.toggle('hidden', !busy)
+        statusEl.classList.toggle('error', error)
+        statusEl.classList.toggle('ready', ready)
+        keyPanel.classList.toggle('hidden', !waitingKey || waitingAccess)
+        accessPanel.classList.toggle('hidden', !waitingAccess)
+        saveBtn.classList.toggle('hidden', !waitingKey)
+        retryBtn.classList.toggle('hidden', !error)
+        hideBtn.classList.toggle('hidden', !ready)
+
+        if (waitingAccess) {
+          title.textContent = 'Enter your access key'
+          subtitle.textContent = 'WriteUp uses a hosted server — nothing else needs installing on this computer.'
+        } else if (waitingKey) {
+          title.textContent = 'Connect a model'
+          subtitle.textContent = 'Use the Ollama app already running on this PC, or paste an OpenRouter key.'
+        } else if (ready) {
+          const hotkey = p.hotkey || 'Ctrl+Shift+G'
+          title.textContent = 'WriteUp is running'
+          subtitle.innerHTML = `Keep this app running (tray icon). Select text in any app, then press <kbd>${hotkey}</kbd>. If nothing appears, right-click the tray icon and choose Test.`
+        } else if (error) {
+          title.textContent = 'Setup needs a missing piece'
+          subtitle.textContent = 'Install the dependency below, then retry. The app will pick up from there.'
+        } else {
+          title.textContent = 'Setting up…'
+          subtitle.textContent = p.remote
+            ? 'Connecting to WriteUp server…'
+            : 'Installing the files this app needs, then starting the local backend.'
+        }
+      }
+
+      window.electronAPI.onSetupProgress(render)
+      window.electronAPI.getSetupState().then(render)
+
+      const ollamaFields = document.getElementById('ollama-fields')
+      const openrouterFields = document.getElementById('openrouter-fields')
+      document.getElementById('use-ollama').addEventListener('change', syncProvider)
+      document.getElementById('use-openrouter').addEventListener('change', syncProvider)
+      function syncProvider() {
+        const ollama = document.getElementById('use-ollama').checked
+        ollamaFields.classList.toggle('hidden', !ollama)
+        openrouterFields.classList.toggle('hidden', ollama)
+      }
+
+      saveBtn.addEventListener('click', async () => {
+        saveBtn.disabled = true
+        try {
+          if (!accessPanel.classList.contains('hidden')) {
+            const key = document.getElementById('access-key').value.trim()
+            if (key) await window.electronAPI.saveAccessKey(key)
+          } else if (document.getElementById('use-ollama').checked) {
+            await window.electronAPI.saveLlmSettings({
+              provider: 'ollama',
+              ollamaUrl: document.getElementById('ollama-url').value.trim(),
+              ollamaModel: document.getElementById('ollama-model').value.trim() || 'qwen3',
+            })
+          } else {
+            const key = document.getElementById('api-key').value.trim()
+            if (!key) return
+            await window.electronAPI.saveLlmSettings({ provider: 'openrouter', apiKey: key })
+          }
+        } finally {
+          saveBtn.disabled = false
+        }
+      })
+
+      for (const form of [keyPanel, accessPanel]) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault()
+          saveBtn.click()
+        })
+      }
+      retryBtn.addEventListener('click', () => window.electronAPI.retrySetup())
+      hideBtn.addEventListener('click', () => window.electronAPI.finishSetup())
+    </script>
+  </body>
+</html>
