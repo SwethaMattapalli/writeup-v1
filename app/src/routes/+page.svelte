@@ -3,6 +3,8 @@
 
   // ── Config ──────────────────────────────────────────────────────────────────
   const LOCAL_BACKEND_URL = "http://127.0.0.1:8090";
+  // Web build (e.g. Netlify) has no electronAPI; set VITE_BACKEND_URL at build time to the hosted backend.
+  const WEB_BACKEND_URL = (import.meta.env.VITE_BACKEND_URL ?? "").replace(/\/+$/, "");
   const TONES = ["Confident", "Professional", "Friendly", "Concise"] as const;
   type Tone = (typeof TONES)[number];
   type Mode = "rewrite" | "generate";
@@ -34,7 +36,7 @@
     const cfg = await window.electronAPI?.getBackendConfig?.().catch(() => null);
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (cfg?.accessKey) headers.Authorization = `Bearer ${cfg.accessKey}`;
-    return { url: cfg?.url || LOCAL_BACKEND_URL, headers };
+    return { url: cfg?.url || WEB_BACKEND_URL || LOCAL_BACKEND_URL, headers };
   }
 
   function looksLikePrompt(text: string): boolean {
